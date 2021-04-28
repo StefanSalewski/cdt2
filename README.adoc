@@ -1,0 +1,74 @@
+= Fully_Dynamic_Constrained_Delaunay_Triangulations
+(c) Stefan Salewski 2019, 2020, 2021                                     
+//Version 0.1 2021-APR-28     
+:experimental:
+:imagesdir: http://ssalewski.de/tmp
+:source-highlighter: pygments
+:pygments-style: monokai
+:icons: font
+
+image::NimCDT1.png[]
+
+image::NimCDT2.png[]
+
+This is an Incremental (Fully Dynamic) Constrained_Delaunay_Triangulation written
+from scratch in the Nim programming language.
+
+The implementation is based on the Kallmann paper
+
+https://www.researchgate.net/publication/2478154_Fully_Dynamic_Constrained_Delaunay_Triangulations
+
+and some other papers cited in the source code.
+
+While the initial version followed strictly the papers and basically worked well, it was discovered during
+actually using it, that the API design does not work well with inheritance and OOP programming
+style. So for this version we are in the process of modifying the API a bit and so called it cdt2.
+Maybe later we can join both versions, but for now we need total freedon for API changes.
+
+This cdt2 version is used for the PCB rubberband router: https://github.com/StefanSalewski/RBR
+
+As underlying data structure the Quad-Edge structure is used. For point location we use the
+"jump and walk" algorithm, which is very simple and generally fast enough.
+
+We added "cursor" annotation to the  Quad-Edge data structure to enable compiling with ARC
+memory management.
+
+This type of CDT allows insertion and removal of points and line segments in arbitrary order.
+Intersecting and overlapping segments as well as duplicated points are supported. Typical
+running time for triangulations with N vertices is O(N ^ (1/3)) for single insert or delete operations,
+which is not too far away from the optimal (log N) case.
+ 
+As this is an early draft, much more testing is necessary. (Well known problems for CDTs can
+be numerically instabilities.) The API will change when we start using this library, it may become
+more generic, and more traversal operations will be added.
+
+Maybe most serious limitation is, that we have to specify an initial bounding box for all of our data
+points when we create the CDT. This is a common practice and simplifies the algorithm. Maybe later we
+can remove this restriction.
+
+////
+
+For testing currently the files test0.nim and test.nim are provided. Test0.nim is a very basic
+test with only textual output. Test.nim generates graphical output as shown above, but you need
+GTK3 and gintro Nim bindings for it.
+
+Sketch of basic use is like this:
+
+[[t0.nim]]
+[source,nim]
+.t0.nim
+----
+import cdt/[dt, vectors, edges, types]
+
+proc main =
+  var dt: DelaunayTriangulation = initDelaunayTriangulation(initVector(minX, minY), initVector(maxX, maxY))
+  discard dt.insert(Vector(x: 5, y: 10)) # insert a single point
+  let cid dt.insert(Vector(x: 20, y: 30), Vector(x: 30, y: 90)) # insert a constrained line segment
+  discard dt.removeConstraint(cid) # remove an segment
+
+main()
+----
+
+NOTE: Related work: https://github.com/Nycto/DelaunayNim
+
+////
