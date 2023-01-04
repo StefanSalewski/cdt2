@@ -32,7 +32,8 @@ type
   Edge* = ref object
     quadEdge*: QuadEdge
     vertex*: Vertex
-    next*{.cursor.}: Edge
+    #next*{.cursor.}: Edge
+    next*: Edge
     num*: int # 0 .. 3
 
 type
