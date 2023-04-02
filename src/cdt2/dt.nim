@@ -167,8 +167,9 @@ proc getStartVertex(this: DelaunayTriangulation; x, y: float): Vertex =
       result = v
 
 func rightOf(x: Vector; e: Edge): bool {.inline.} =
-  ccw(e.dest.point, e.org.point, x)
-
+  # ccw(e.dest.point, e.org.point, x) # issue due to nummeric inaccuracy
+  triArea(e.org.point, e.dest.point, x) < 0 # fix, 20230402
+  
 # Returns an edge e, s.t. either x is on e, or e is an edge of
 # a triangle containing x. The search starts from startingEdge
 # and proceeds in the general direction of x. Based on the
